@@ -1,1 +1,1 @@
-{"Starspy": 1, "bfvjbvf": "Test1", "sia": "jkfvb", "amas": "amssss", "ama": "aty", "Starspy": 1, "bfvjbvf": "Test1", "sia": "jkfvb", "amas": "amssss"}
+{"amas": {"data": "amssss", "ttl": 100}, "masssni": {"data": "nandri", "ttl": 100}}
