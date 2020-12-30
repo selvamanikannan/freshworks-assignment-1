@@ -1,0 +1,1 @@
+{"amas": {"data": "amssss", "ttl": 100, "inserted_at": 1609313986}, "ama": {"jh": "jhg", "ttl": 2, "inserted_at": 1609313986}}
