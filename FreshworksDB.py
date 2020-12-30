@@ -2,17 +2,23 @@ import json
 import os
 from LRUCache import LRUCache
 import time
+from random import randint
 
 
 class SelvaDB(object):
     def __init__(self, fileName=None):
         if fileName is None:
-            self.filename = "filename.txt"
+            self.filename = "selvaDB"+str(randint(1000,9999))+".txt"
         else:
             self.filename = fileName
+        try:
+            open(self.filename).close()
+        except IOError:
+            open(self.filename,"w").close()
+
         self.deleteList = []
         self.cache = LRUCache(10)
-        self.fileHandler = open(self.filename, 'wb+')
+        self.fileHandler = open(self.filename, 'rb+')
 
     def throwException(self, data):
         self.commit()
@@ -113,7 +119,7 @@ class SelvaDB(object):
             self.writeFile(data)
 
 
-s = SelvaDB("selva.txt")
+s = SelvaDB()
 # s.writeFile({'Starspy': {"data":"1","ttl":10}, 'bfvjbvf': {"data":"vana","ttl":100}, 'sia': {"data":"mmnyf","ttl":100}})
 # print(s.readFile())
 s.add("amas", {"data": "amssss", })
