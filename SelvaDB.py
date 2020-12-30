@@ -3,76 +3,36 @@ import os
 from LRUCache import LRUCache
 import time
 from random import randint
+from threading import Lock
+from FileHandler import FileHandler
 
 
 class SelvaDB(object):
-    def __init__(self, fileName=None):
-        if fileName is None:
-            self.filename = "selvaDB"+str(randint(1000,9999))+".txt"
-        else:
-            self.filename = fileName
-        try:
-            open(self.filename).close()
-        except IOError:
-            open(self.filename,"w").close()
 
+    def __init__(self,fileName = None):
+        self.fh = FileHandler(fileName)
         self.deleteList = []
         self.cache = LRUCache(10)
-        self.fileHandler = open(self.filename, 'rb+')
+        self.lock = Lock()
 
     def throwException(self, data):
-        self.commit()
+        self.fh.commit(self.deleteList)
+        self.deleteList.clear()
         raise Exception(data)
 
-    def writeFile(self, data):
-        try:
-            self.delLastFile()
-            self.fileHandler.seek(0, os.SEEK_END)
-            res = (', '+json.dumps(data)[1:]).encode()
-            self.fileHandler.write(res)
-        except:
-            self.fileHandler.seek(0, 0)
-            self.fileHandler.write(json.dumps(data).encode())
-        self.fileHandler.flush()
-
-    def readFile(self):
-        self.fileHandler.seek(0, 0)
-        read_data = self.fileHandler.readline()
-        return json.loads(read_data)
-
-    def deleteFile(self, key):
-        data = self.readFile()
-        if key in data.keys():
-            self.deleteList.append(key)
-            return True
-            # del data[key]
-            # open(self.filename, "w").close()
-            # self.writeFile(data)
-            return True
-        else:
-            return False
-
-    def delLastFile(self,):
-        with open(self.filename, 'rb+') as tempFileHandle:
-            tempFileHandle.seek(-1, os.SEEK_END)
-            tempFileHandle.truncate()
-            tempFileHandle.close()
-
     def getValueFromFile(self, key):
-        self.fileHandler.seek(0, 0)
-        fileData = self.fileHandler.readline()
-        if(fileData == b''):
-            return False
-        read_data = json.loads(fileData)
-        if key in read_data.keys():
-            return read_data[key]
-        else:
-            return False
+        try:
+            data = self.fh.readFile()
+            if key in data.keys():
+                return data[key]
+        except:
+            pass
+        return False
+
 
     def get(self, key):
         if key in self.deleteList:
             self.throwException("Error: Key not found")
-        print("hjg")
         value = self.cache.get(key)
         if(value is not False and ('ttl' not in value.keys() or ('ttl' in value.keys() and (int(time.time()) - value['inserted_at'] <= value['ttl'])))):
             return value
@@ -85,6 +45,8 @@ class SelvaDB(object):
 
     def add(self, key, value):
         data = {key: value}
+        value['inserted_at'] = int(time.time())
+
         if not isinstance(key, str):
             self.throwException("Error: Key must be string")
         if len(key) > 32:
@@ -98,44 +60,38 @@ class SelvaDB(object):
         if key in self.deleteList:
             self.deleteList.remove(key)
 
-        value['inserted_at'] = int(time.time())
-        self.writeFile(data)
+        self.fh.writeFile(data)
         self.cache.put(key, value)
 
     def delete(self, key):
-        if not self.deleteFile(key):
+        self.lock.acquire()
+        data = self.fh.readFile()
+        if key in self.deleteList or key not in data.keys():
             self.throwException("Error: Key not found")
+        self.deleteList.append(key)
         self.cache.delete(key)
-
-    def commit(self):
-        if len(self.deleteList) > 0:
-            data = self.readFile()
-            for key in self.deleteList:
-                if key in data.keys():
-                    del data[key]
-            print(data)
-            with open(self.filename, "w") as f:
-                f.close()
-            self.writeFile(data)
+        self.lock.release()
 
 
-s = SelvaDB()
+s = SelvaDB("siva.txt")
+# s = SelvaDB("siva")
 # s.writeFile({'Starspy': {"data":"1","ttl":10}, 'bfvjbvf': {"data":"vana","ttl":100}, 'sia': {"data":"mmnyf","ttl":100}})
-# print(s.readFile())
+# # print(s.readFile())
 s.add("amas", {"data": "amssss", })
 s.add("masssni", {"mani": "amssss",} )
 # s.add("masssni", {"data": "nandri", "ttl": 100})
-s.add("kjhg", {"jh": "jhg", "ttl": 2})
-print(s.readFile())
-print(s.get("amas"))
-# print(s.get("masssni"))
-a = input()
-print(s.get("kjhg"))
+s.add("kjhg", {"jh": "jhg", "ttl": 1})
+# print(s.readFile())
+print(s.get("masssni"))
+print(s.delete("masssni"))
+print(s.delete("masssni"))
+# a = input()
+# print(s.get("kjhg"))
 # print(s.get("masssni"))
 # print(s.readFile())
-# print(s.delete("masssni"))
-s.commit()
-print(s.readFile())
+# print(s.get("masssni"))
+# s.commit()
+# print(s.readFile())
 # delete('ama')
 # print(readFile())
 # delete('amannn')
