@@ -10,8 +10,13 @@ class SelvaDB(object):
             self.filename = "filename.txt"
         else:
             self.filename = fileName
+        self.deleteList = []
         self.cache = LRUCache(10)
         self.fileHandler = open(self.filename, 'wb+')
+
+    def throwException(self, data):
+        self.commit()
+        raise Exception(data)
 
     def writeFile(self, data):
         try:
@@ -32,13 +37,11 @@ class SelvaDB(object):
     def deleteFile(self, key):
         data = self.readFile()
         if key in data.keys():
-            del data[key]
-            open(self.filename, "w").close()
-            self.writeFile(data)
-            # instead of using two different file handler for truncate file and writing updated value
-            # we can use single file handler, where both truncate and write can be done
-            # like, one join query is better than two diff select query to query engine
-            # considering code resubality, here i simply invoked writeFile function
+            self.deleteList.append(key)
+            return True
+            # del data[key]
+            # open(self.filename, "w").close()
+            # self.writeFile(data)
             return True
         else:
             return False
@@ -61,44 +64,71 @@ class SelvaDB(object):
             return False
 
     def get(self, key):
+        if key in self.deleteList:
+            self.throwException("Error: Key not found")
+        print("hjg")
         value = self.cache.get(key)
-        if(value is not False):
+        if(value is not False and ('ttl' not in value.keys() or ('ttl' in value.keys() and (int(time.time()) - value['inserted_at'] <= value['ttl'])))):
             return value
         value = self.getValueFromFile(key)
-        if(value is not False):
+        if(value is not False and ('ttl' not in value.keys() or ('ttl' in value.keys() and (int(time.time()) - value['inserted_at'] <= value['ttl'])))):
             return value
-        raise Exception("Error: Key not found")
+        if(value is not False):
+            self.deleteList.append(key)
+        self.throwException("Error: Key not found")
 
     def add(self, key, value):
-        value['inserted_at'] = int(time.time())
         data = {key: value}
         if not isinstance(key, str):
-            raise Exception("Error: Key must be string")
+            self.throwException("Error: Key must be string")
         if len(key) > 32:
-            raise Exception("Error: Length of key should be less 32 chars")
+            self.throwException("Error: Length of key should be less than or equal to 32 chars")
         if(self.cache.get(key) != False or self.getValueFromFile(key) != False):
-            raise Exception("Error: Key alerady exists")
+            self.throwException("Error: Key alerady exists")
+        if not isinstance(value, dict):
+            self.throwException("Error: Value must be json")
+        if (len(str(value))/1024) > 16:
+            self.throwException("Error: Size of value should be less than or equal to 16KB")
+        if key in self.deleteList:
+            self.deleteList.remove(key)
+
+        value['inserted_at'] = int(time.time())
         self.writeFile(data)
         self.cache.put(key, value)
 
     def delete(self, key):
         if not self.deleteFile(key):
-            raise Exception("Error: Key not found")
+            self.throwException("Error: Key not found")
         self.cache.delete(key)
+
+    def commit(self):
+        if len(self.deleteList) > 0:
+            data = self.readFile()
+            for key in self.deleteList:
+                if key in data.keys():
+                    del data[key]
+            print(data)
+            with open(self.filename, "w") as f:
+                f.close()
+            self.writeFile(data)
 
 
 s = SelvaDB("selva.txt")
 # s.writeFile({'Starspy': {"data":"1","ttl":10}, 'bfvjbvf': {"data":"vana","ttl":100}, 'sia': {"data":"mmnyf","ttl":100}})
 # print(s.readFile())
-s.add("amas", {"data": "amssss", "ttl": 100})
-s.add("masssni", {"data": "nandri", "ttl": 100})
+s.add("amas", {"data": "amssss", })
+s.add("masssni", {"mani": "amssss",} )
+# s.add("masssni", {"data": "nandri", "ttl": 100})
+s.add("kjhg", {"jh": "jhg", "ttl": 2})
 print(s.readFile())
-
-s.add("ama", {"jh": "jhg","ttl":2})
 print(s.get("amas"))
-print(s.get("masssni"))
-print(s.readFile())
-print(s.delete("masssni"))
+# print(s.get("masssni"))
+a = input()
+print(s.get("kjhg"))
+# print(s.get("masssni"))
+# print(s.readFile())
+# print(s.delete("masssni"))
+s.commit()
 print(s.readFile())
 # delete('ama')
 # print(readFile())
