@@ -1,1 +1,0 @@
-{, "siva": {"college": "TCE", "branch": "CSE", "ttl": 100, "inserted_at": 1609412455}, "selva": {"college": "TCE", "branch": "CSE", "ttl": 100, "inserted_at": 1609412455}, "ram": {"college": "CEG", "branch": "EEE", "ttl": 100, "inserted_at": 1609412455}, "rachit": {"college": "IIMC", "branch": "MECH", "ttl": 2, "inserted_at": 1609412455}}
