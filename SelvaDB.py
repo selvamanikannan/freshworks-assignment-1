@@ -8,11 +8,21 @@ from FileHandler import FileHandler
 
 
 class SelvaDB(object):
+    '''
+    This is main class for Key-Value store database.
+    to store recent data, LRU cache is used
+        -> size of this cache has to determined
+            1. It shouldn't be minimum, because page replacements will be frequent
+            2. It can't be huge too. because this itself may occupy more space
+    '''
 
     def __init__(self,fileName = None):
+        '''
+            create new file object -> to handle read and write operation in file
+        '''
         self.fh = FileHandler(fileName)
         self.deleteList = []
-        self.cache = LRUCache(10)
+        self.cache = LRUCache(20)
         self.lock = Lock()
 
     def throwException(self, data):

@@ -11,7 +11,9 @@ class TestSum(unittest.TestCase):
         self.assertEqual(os.path.isfile("testdb.txt"),True)
     
     def test_keySize(self):
-        self.assertEqual(self.db.add("selva",{"college":"TCE", "branch":"CSE","ttl":100}),None)
+        self.db.add("selva",{"college":"TCE", "branch":"CSE","ttl":100})
+        self.db.add("raja",{"college":"ABC", "branch":"CSE","ttl":100})
+        self.db.add("anand",{"college":"DEF", "branch":"CSE","ttl":100})
         with self.assertRaises(Exception) as excep:
             self.db.add("abcdefghijklmnopqrstabcdefghijklmnopqrst",{"college":"psg"})
     
