@@ -46,6 +46,7 @@ class SelvaDB(object):
     def add(self, key, value):
         data = {key: value}
         value['inserted_at'] = int(time.time())
+    
 
         if not isinstance(key, str):
             self.throwException("Error: Key must be string")
@@ -71,36 +72,3 @@ class SelvaDB(object):
         self.deleteList.append(key)
         self.cache.delete(key)
         self.lock.release()
-
-
-s = SelvaDB("siva.txt")
-# s = SelvaDB("siva")
-# s.writeFile({'Starspy': {"data":"1","ttl":10}, 'bfvjbvf': {"data":"vana","ttl":100}, 'sia': {"data":"mmnyf","ttl":100}})
-# # print(s.readFile())
-s.add("amas", {"data": "amssss", })
-s.add("masssni", {"mani": "amssss",} )
-# s.add("masssni", {"data": "nandri", "ttl": 100})
-s.add("kjhg", {"jh": "jhg", "ttl": 1})
-# print(s.readFile())
-print(s.get("masssni"))
-print(s.delete("masssni"))
-print(s.delete("masssni"))
-# a = input()
-# print(s.get("kjhg"))
-# print(s.get("masssni"))
-# print(s.readFile())
-# print(s.get("masssni"))
-# s.commit()
-# print(s.readFile())
-# delete('ama')
-# print(readFile())
-# delete('amannn')
-# add("ama", "aty")
-# # add("vnr", "aty")
-# # print(readFile())
-# # data = {'mani': 1, 'fhb': 'Test1'}
-# # writeFile(data)
-# # print(readFile())
-# # data = {'asd': 1, 'jfjf': 'Test1', 'jkhfbkfbfjf': 'Test1'}
-# # writeFile(data)
-# # print(readFile())

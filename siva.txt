@@ -1,1 +1,1 @@
-{"amas": {"data": "amssss", "inserted_at": 1609342852}, "kjhg": {"jh": "jhg", "ttl": 1, "inserted_at": 1609342852}}
+{"amas": {"data": "amssss", "inserted_at": 1609343985}, "kjhg": {"jh": "jhg", "ttl": 1, "inserted_at": 1609343985}}
