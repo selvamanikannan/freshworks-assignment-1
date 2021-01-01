@@ -8,17 +8,18 @@ from threading import Lock
 
 class FileHandler:
     ''''
-        This class handles all read write opeations
-        DB class will create an object for this
-        Only this particluar class do read and write operations in file
+       This class handles all read write operations
+       DB class will create an object for this
+       Only this particular class do read and write operations in file
     '''
     filesUsed = []
 
     def __init__(self, fileName=None):
-        '''If filename is provide use the same. otherwise create new file
-            constructor overloading
-                -> default constructor - create new file
-                -> 1 arg constructor - open file with that argument        
+        '''
+        If filename is provided use the same. otherwise create new file
+           constructor overloading
+               -> default constructor - create new file
+               -> 1 arg constructor - open file with that argument       
         '''
         if fileName is None:
             self.filename = "selvaDB"+str(randint(1000,9999))+".txt"
@@ -40,7 +41,7 @@ class FileHandler:
     def writeFile(self, data):
         '''
         Method to write data(json) into file
-            -> check filesize - if it exceeds 1GB throw exception
+            -> check file size - if it exceeds 1GB throw exception
             -> file is not empty - delete last char(}) from file, write ,
             -> move file pointer to end
             -> write data
@@ -61,8 +62,8 @@ class FileHandler:
     def readFile(self):
         '''
         Read data from file
-            -> entire file will have json data, in this every key, value is inserted data
-            -> retrive entire data, and load it as json        
+           -> entire file will have json data, in this every key, value is inserted data
+           -> retrieve entire data, and load it as json      
         '''
         self.fileHandler.seek(0, 0)
         read_data = self.fileHandler.readline()

@@ -9,11 +9,11 @@ from FileHandler import FileHandler
 
 class SelvaDB(object):
     '''
-    This is main class for Key-Value store database.
+    This is the main class for the Key-Value store database.
     to store recent data, LRU cache is used
-        -> size of this cache has to determined
-            1. It shouldn't be minimum, because page replacements will be frequent
-            2. It can't be huge too. because this itself may occupy more space
+       -> size of this cache has to determined
+           1. It shouldn't be minimum, because page replacements will be frequent
+           2. It can't be huge too. because this itself may occupy more space
     '''
 
     def __init__(self,fileName = None):
@@ -27,9 +27,9 @@ class SelvaDB(object):
 
     def throwException(self, data):
         '''
-            This is helper method for throw exception
-            -> commit all changes before thowing exception
-            -> go to commit method, for more info
+           This is helper method for throw exception
+           -> commit all changes before throwing exception
+           -> go to commit method, for more info
         '''
         self.fh.commit(self.deleteList)
         self.deleteList.clear()
@@ -51,11 +51,11 @@ class SelvaDB(object):
 
     def get(self, key):
         '''
-        To get the value from db
-        check data exist in LRU or File
-        incase of key is there, check data is alive by checking (current epoch - inserted_at of data > time to live), then return value
-        otherwise key not found
-        '''
+            To get the value from db
+            check data exist in LRU or File
+            incase of key is there, check data is alive by checking (current epoch - inserted_at of data > time to live), then return value
+            otherwise key not found
+       '''
         if key in self.deleteList:
             self.throwException("Error: Key not found")
         value = self.cache.get(key)
@@ -71,11 +71,11 @@ class SelvaDB(object):
     def add(self, key, value):
         '''
         To insert new key value in db
-        while inserting we are adding inserted_at property 
-            this is similar to adding inserted_at coulmn in sql database. default value - cucrrent timestamp - here we used epoch
-            sql query  - col2 datetime not null default(current_timestamp)
-            In this it throws an error - with respect to functional requirements
-        '''
+        while inserting we are adding inserted_at property
+           This is similar to adding inserted_at columns in sql databases. default value - current timestamp - here we used epoch
+           sql query  - col2 datetime not null default(current_timestamp)
+           In this it throws an error - with respect to functional requirements
+       '''
         data = {key: value}
         value['inserted_at'] = int(time.time())
     
@@ -102,11 +102,17 @@ class SelvaDB(object):
         key not in file -> this particular key is never added. so throw exception
         otherwise add this key in deleteList - this has to be deleted
         later this can be deleted by calling commit method
+
+        Thread Safe
+        when many threads are calling, data consistency may not be there
+        ideally, when a read operation made by thread - always it should get the last updated value 
+        in our case, it should get data or not depends on delete operation
+        
+        by using lock(a concept from operating systems) this delete operation can be called by only one thread at a time
         '''
         self.lock.acquire()
         data = self.fh.readFile()
         if key in self.deleteList or key not in data.keys():
             self.throwException("Error: Key not found")
         self.deleteList.append(key)
-        self.cache.delete(key)
         self.lock.release()

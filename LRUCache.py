@@ -18,10 +18,3 @@ class LRUCache:
         self.cache.move_to_end(key)
         if len(self.cache) > self.capacity:
             self.cache.popitem(last=False)
-
-    def delete(self, key) -> bool:
-        if key in self.cache.keys():
-            del self.cache[key]
-            return True
-        else:
-            return False
